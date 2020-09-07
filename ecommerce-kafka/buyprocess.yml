@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-buyprocess
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 8081
+  selector:
+    app: buyprocess-pod
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buyprocess-pod
+  labels:
+    app: buyprocess-pod
+    version: v1
+spec:
+  selector:
+    matchLabels:
+      app: buyprocess-pod
+      version: v1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: buyprocess-pod
+        version: v1
+    spec:
+      containers:
+      - image: douglasnogueiram/ms-communication-buyprocess:3.0.0.-SNAPSHOT
+        name: buyprocess-pod
+        command:
+          - "java"
+          - "-Delastic.apm.active=$(ELASTIC_APM_ACTIVE)"
+          - "-Delastic.apm.server_urls=$(ELASTIC_APM_SERVER_URLS)"
+          - "-Delastic.apm.service_name=$(ELASTIC_APM_SERVICE_NAME)"
+          - "-Delastic.apm.secret_token=$(ELASTIC_APM_SECRET_TOKEN)"
+          - "-Delastic.apm.enabled=$(ELASTIC_APM_ENABLED)"
+          - "-Delastic.apm.capture_body=$(ELASTIC_APM_CAPTURE_BODY)"
+          - "-Delastic.apm.capture_body_content_types=$(ELASTIC_APM_CAPTURE_BODY_CONTENT_TYPES)"
+          - "-Delastic.apm.capture_headers=$(ELASTIC_APM_CAPTURE_HEADERS)"
+          - "-jar"
+          - "ms-communication-buyprocess.jar"  
+        env:
+        - name: TOPICO_ENTRADA
+          value: "pagamento-aguardando"
+        - name: TOPICO_FINALIZADO
+          value: "pagamento-finalizado"
+        - name: BANK_LINK
+          value: "http://service-bank:8090/pagamento"
+        - name: SERVER_PORT
+          value: "8081"
+        - name: ELASTIC_APM_SERVER_URL 
+          value: "http://172.18.0.10:8200"
+        - name: ELASTIC_APM_SERVER_URLS
+          value: "http://172.18.0.10:8200"  
+        - name: ELASTIC_APM_SERVICE_NAME 
+          value: "ms-communication-buyprocess" 
+        - name: ELASTIC_APM_APPLICATION_PACKAGES 
+          value: "ms-communication-buyprocess" 
+        - name: ELASTIC_APM_ENVIRONMENT 
+          value: "test" 
+        - name: ELASTIC_APM_SECRET_TOKEN 
+          value: "3vTJyN9cw344Wx8f0l6h01Bw"      
+        - name: ELASTIC_APM_ENABLED
+          value: "true"
+        - name: ELASTIC_APM_CAPTURE_BODY
+          value: "all"
+        - name: ELASTIC_APM_ACTIVE
+          value: "true"
+        - name: ELASTIC_APM_CAPTURE_BODY_CONTENT_TYPES
+          value: "application/x-www-form-urlencoded*, text/*, application/json*, application/xml*"
+        - name: ELASTIC_APM_CAPTURE_HEADERS
+          value: "true"
+        - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+          value: "air-de-douglas:9092"
+        - name: SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS
+          value: "air-de-douglas:9092"
+        - name: SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS
+          value: "air-de-douglas:9092"
+        - name: SPRING_KAFKA_PRODUCER_CLIENT_ID
+          value: "ms-communication-buyprocess"
+        - name: SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER
+          value: "org.apache.kafka.common.serialization.StringSerializer"
+        - name: SPRING_KAFKA_PRODUCER_KEY_SERIALIZER
+          value: "org.apache.kafka.common.serialization.StringSerializer"
+        - name: SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER
+          value: "org.apache.kafka.common.serialization.StringDeserializer"
+        - name: SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER
+          value: "org.apache.kafka.common.serialization.StringDeserializer"
+        ports:
+        - containerPort: 8081
+          name: http

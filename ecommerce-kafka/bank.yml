@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-bank
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 8090
+  selector:
+    app: bank-pod
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bank-pod
+  labels:
+    app: bank-pod
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bank-pod
+      version: v1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: bank-pod
+        version: v1
+    spec:
+      containers:
+      - image: douglasnogueiram/ms-communication-bank:3.0.0.-SNAPSHOT
+        name: bank-pod
+        command:
+          - "java"
+          - "-Delastic.apm.active=$(ELASTIC_APM_ACTIVE)"
+          - "-Delastic.apm.server_urls=$(ELASTIC_APM_SERVER_URLS)"
+          - "-Delastic.apm.service_name=$(ELASTIC_APM_SERVICE_NAME)"
+          - "-Delastic.apm.secret_token=$(ELASTIC_APM_SECRET_TOKEN)"
+          - "-Delastic.apm.enabled=$(ELASTIC_APM_ENABLED)"
+          - "-Delastic.apm.capture_body=$(ELASTIC_APM_CAPTURE_BODY)"
+          - "-Delastic.apm.capture_body_content_types=$(ELASTIC_APM_CAPTURE_BODY_CONTENT_TYPES)"
+          - "-Delastic.apm.capture_headers=$(ELASTIC_APM_CAPTURE_HEADERS)"
+          - "-jar"
+          - "ms-communication-bank.jar"        
+        env:
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "root"
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql/banco"
+        - name: SERVER_PORT
+          value: "8090"
+        - name: ELASTIC_APM_SERVER_URL 
+          value: "http://172.18.0.10:8200"
+        - name: ELASTIC_APM_SERVER_URLS
+          value: "http://172.18.0.10:8200"  
+        - name: ELASTIC_APM_SERVICE_NAME 
+          value: "ms-communication-bank" 
+        - name: ELASTIC_APM_APPLICATION_PACKAGES 
+          value: "ms-communication-bank" 
+        - name: ELASTIC_APM_ENVIRONMENT 
+          value: "test" 
+        - name: ELASTIC_APM_SECRET_TOKEN 
+          value: "3vTJyN9cw344Wx8f0l6h01Bw"      
+        - name: ELASTIC_APM_ENABLED
+          value: "true"
+        - name: ELASTIC_APM_CAPTURE_BODY
+          value: "all"
+        - name: ELASTIC_APM_ACTIVE
+          value: "true"
+        - name: ELASTIC_APM_CAPTURE_BODY_CONTENT_TYPES
+          value: "application/x-www-form-urlencoded*, text/*, application/json*, application/xml*"
+        - name: ELASTIC_APM_CAPTURE_HEADERS
+          value: "true"
+        ports:
+        - containerPort: 8090
+          name: http

@@ -1,0 +1,24 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: virtualservice-buytrip
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - payment-gateway
+  http:
+  - match:
+    - method:
+        exact: POST
+    - uri:
+        exact: /
+    route:
+      - destination:
+          host: service-buytrip
+          subset: v1
+        weight: 80  
+      - destination:
+          host: service-buytrip
+          subset: v2 
+        weight: 20  

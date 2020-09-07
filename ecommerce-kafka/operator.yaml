@@ -1,0 +1,11 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  meshConfig:
+    defaultConfig:
+      tracing:
+        sampling: 90
+        custom_tags:
+          my_tag_header:
+            header:
+              name: host
