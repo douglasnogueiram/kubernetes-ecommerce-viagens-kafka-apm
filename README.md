@@ -1,7 +1,7 @@
-# Kubernetes-ecommerce-viagens
+# Kubernetes-ecommerce-viagens-Kafka
  Arquivos YAML para configuração K8s e Istio. Nesta versão, a integração via RabbitMQ é substituida pelo Apache Kafka. Também foi incluído o monitoramento via Elastic ALM.
 
-![alt text](https://github.com/douglasnogueiram/Kubernetes-ecommerce-viagens/blob/master/Captura%20de%20Tela%202020-08-02%20a%CC%80s%2012.38.09.png)
+![alt text](https://github.com/douglasnogueiram/kubernetes-ecommerce-viagens-kafka-apm/blob/master/ecommerce-kafka/Ecommerce_Kafka_APM.png)
 
 Os microsserviços de exemplo estão nos repositórios:
 - https://github.com/douglasnogueiram/ms-communication-bank-kafka
